@@ -1,6 +1,7 @@
 import {Component, enableProdMode} from 'angular2/core';
 import {NgClass} from 'angular2/common';
 import {SingleTile} from './single.tile.component';
+import uuid from 'node-uuid';
 
 interface ITile {
   id?: number;
@@ -15,8 +16,8 @@ enableProdMode();
 @Component({
   selector: 'app',
   template: `
-  <div class="tileBoard">
-    <single-tile *ngFor="#tile of getTiles()" [tile]="tile" (tile-click)="handleTileClick($event)"></single-tile>
+  <div class='tileBoard'>
+    <single-tile *ngFor='#tile of getTiles()' [tile]='tile' (tile-click)='handleTileClick($event)'></single-tile>
   </div>
   `,
   directives: [NgClass, SingleTile]
@@ -42,7 +43,7 @@ export class AppComponent {
         }
         let copyOfBaseTiles = _tilesArray;
         let newTiles = this.shuffleTile(copyOfBaseTiles);
-      console.log("createGameTiles", newTiles);
+        console.log('createGameTiles', newTiles);
         return newTiles;
     }
 
@@ -51,7 +52,7 @@ export class AppComponent {
     constructor() {
         if (this.createTiles()) {
             this.tile = this.createTiles();
-       this._tiles = this.createGameTiles(32);
+            this._tiles = this.createGameTiles(32);
         }
     }
 
@@ -85,10 +86,10 @@ export class AppComponent {
 
     createTileObject() {
         let _tile: ITile = {
-          id: 1,
+          id:  uuid.v4(),
           isRevealed: false,
           isMatched: false,
-          pattern: this.createTile(),
+          pattern: this.createTile()
         };
         return _tile;
     };

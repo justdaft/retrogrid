@@ -20,10 +20,6 @@
     "app/app.component.ts",
     "app/boot.ts",
     "app/single.tile.component.ts",
-    "typings/node-uuid/node-uuid-base.d.ts",
-    "typings/node-uuid/node-uuid-cjs.d.ts",
-    "typings/node-uuid/node-uuid-global.d.ts",
-    "typings/node-uuid/node-uuid.d.ts",
     "typings/node/node.d.ts",
     "typings/tsd.d.ts",
     "node_modules/immutable/dist/immutable.d.ts"
