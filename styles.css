@@ -33,12 +33,12 @@ body {
   margin: 20px;
   background: black;
   display: inline-block;
-  width: 800px;
-  height: 800px;
+  width: 784px;
+  height: 782px;
 }
 
 .singleTile {
-    border: 1px solid whitesmoke;
+    border: 1px solid grey;
     border-radius: 0px;
     margin: -2px;
     background: black;
@@ -50,7 +50,7 @@ body {
     radial-gradient(
         circle at bottom right,
         #a49e96,
-        #605d59
+        #grey
     );
 }
 .tilePatternBlack {
@@ -107,8 +107,8 @@ body {
     background-image:
     radial-gradient(
         circle at top left,
-        #a49e96,
-        #605d59
+        #white,
+        #black
     );
 }
 
@@ -116,8 +116,8 @@ body {
     background-image:
     radial-gradient(
         circle at bottom right,
-        #a49e96,
-        #605d59
+        #yellow,
+        #black
     );
 }
 

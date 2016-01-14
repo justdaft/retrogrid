@@ -19,7 +19,9 @@
   "files": [
     "app/app.component.ts",
     "app/boot.ts",
+    "app/game.ts",
     "app/single.tile.component.ts",
+    "app/util.ts",
     "typings/node/node.d.ts",
     "typings/tsd.d.ts",
     "node_modules/immutable/dist/immutable.d.ts"
