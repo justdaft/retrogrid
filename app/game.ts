@@ -1,137 +1,89 @@
 // credits to Christian Johansen for game logic:
 // https://github.com/cjohansen/react-sweeper
 
-let {List,Map,fromJS} = Immutable;
-import {partition, shuffle, repeat, keep, prop} from './util';
+let {List, Map, fromJS, Repeat} = Immutable;
+import {repeat, shuffle, shuffleTiles} from './util';
+import uuid from 'node-uuid';
 
-function initTiles(rows, cols, mines) {
-  return shuffle(repeat(mines, Map({isMine: true, isRevealed: false})).
-                 concat(repeat(rows * cols - mines, Map({isRevealed: false})))).
-    map(function (tile, idx) {
-      return tile.set('id', idx);
-    });
+
+
+interface ITile {
+  id?: number;
+  isRevealed?: boolean;
+  isMatched?: boolean;
+  pattern?: any;
 }
 
-function onWEdge(game, tile) {
-  return tile % game.get('cols') === 0;
+
+
+function initTiles(rows: number, cols: number) {
+        let numberOfUniqueTiles = rows * cols;
+        let _list = Immutable.fromJS(createTiles(32));
+        console.log('initTiles', _list);
+        return _list;
+        };
+
+function createFreshTiles() {
+
+  return
 }
 
-function onEEdge(game, tile) {
-  return tile % game.get('cols') === game.get('cols') - 1;
+function createTileMap() {
+    let _tile: ITile = {
+      id:  uuid.v4(),
+      isRevealed: false,
+      isMatched: false,
+      pattern: createTilePattern()
+    };
+    return _tile;
+};
+function createTiles(numberOfUniqueTiles: number) {
+    let _tilesArray: Array<any> = [];
+    for (let i = 1; i <= numberOfUniqueTiles; i++) {
+        let tmp = createTileObject();
+        _tilesArray.push(tmp);
+        _tilesArray.push(tmp);
+    }
+    let copyOfBaseTiles = _tilesArray;
+    let newTiles = shuffleTiles(copyOfBaseTiles);
+    console.log('createNewCharacter: ', createNewCharacter());
+    return newTiles;
 }
 
-function idx(game, tile) {
-  if (tile < 0) { return null; }
-  return game.getIn(['tiles', tile]) ? tile : null;
-}
+function createTileObject() {
+    let _tile: ITile = {
+      id:  uuid.v4(),
+      isRevealed: false,
+      isMatched: false,
+      pattern: createTilePattern()
+    };
+    return _tile;
+};
 
-function nw(game, tile) {
-  return onWEdge(game, tile) ? null : idx(game, tile - game.get('cols') - 1);
-}
+function createNewCharacter() {
+  let validNumberPool = List.of(0, 24, 36, 60, 66, 90, 102, 126, 129, 153, 165, 189, 195, 219, 231, 255);
+  return  shuffle(validNumberPool).slice(0, 8);
+};
 
-function n(game, tile) {
-  return idx(game, tile - game.get('cols'));
-}
+function createTilePattern() {
+    let baseTile = [
+        [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0], [0, 0, 1, 1, 1, 1, 0, 0],
+        [0, 1, 0, 0, 0, 0, 1, 0], [0, 1, 0, 1, 1, 0, 1, 0], [0, 1, 1, 0, 0, 1, 1, 0], [0, 1, 1, 1, 1, 1, 1, 0],
+        [1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 1, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 1], [1, 0, 1, 1, 1, 1, 0, 1],
+        [1, 1, 0, 0, 0, 0, 1, 1], [1, 1, 0, 1, 1, 0, 1, 1], [1, 1, 1, 0, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]
+    ];
+    let copyOfBaseTile = baseTile;
+    let newTile = shuffleTiles(copyOfBaseTile);
+    return newTile.slice(0, 8);
+};
 
-function ne(game, tile) {
-  return onEEdge(game, tile) ? null : idx(game, tile - game.get('cols') + 1);
-}
 
-function e(game, tile) {
-  return onEEdge(game, tile) ? null : idx(game, tile + 1);
-}
-
-function se(game, tile) {
-  return onEEdge(game, tile) ? null : idx(game, tile + game.get('cols') + 1);
-}
-
-function s(game, tile) {
-  return idx(game, tile + game.get('cols'));
-}
-
-function sw(game, tile) {
-  return onWEdge(game, tile) ? null : idx(game, tile + game.get('cols') - 1);
-}
-
-function w(game, tile) {
-  return onWEdge(game, tile) ? null : idx(game, tile - 1);
-}
-
-const directions = [nw, n, ne, e, se, s, sw, w];
-
-function neighbours(game, tile) {
-  return keep(directions, function (dir) {
-    return game.getIn(['tiles', dir(game, tile)]);
-  });
-}
-
-function getMineCount(game, tile) {
-  var nbs = neighbours(game, tile);
-  return nbs.filter(prop('isMine')).length;
-}
-
-function isMine(game, tile) {
-  return game.getIn(['tiles', tile, 'isMine']);
-}
-
-function isSafe(game) {
-  const tiles = game.get('tiles');
-  const mines = tiles.filter(prop('isMine'));
-  return mines.filter(prop('isRevealed')) === 0 &&
-    tiles.length - mines.length === tiles.filter(prop('isRevealed')).length;
-}
-
-export function isGameOver(game) {
-  return isSafe(game) || game.get('isDead');
-}
-
-function addThreatCount(game, tile) {
-  return game.setIn(['tiles', tile, 'threatCount'], getMineCount(game, tile));
-}
-
-function revealAdjacentSafeTiles(game, tile) {
-  if (isMine(game, tile)) {
-    return game;
-  }
-  game = addThreatCount(game, tile).setIn(['tiles', tile, 'isRevealed'], true);
-  if (game.getIn(['tiles', tile, 'threatCount']) === 0) {
-    return keep(directions, function (dir) {
-      return dir(game, tile);
-    }).reduce(function (game, pos) {
-      return !game.getIn(['tiles', pos, 'isRevealed']) ?
-        revealAdjacentSafeTiles(game, pos) : game;
-    }, game);
-  }
-  return game;
-}
-
-function attemptWinning(game) {
-  return isSafe(game) ? game.set('isSafe', true) : game;
-}
-
-function revealMine(tile) {
-  return tile.get('isMine') ? tile.set('isRevealed', true) : tile;
-}
-
-function revealMines(game) {
-  return game.updateIn(['tiles'], function (tiles) {
-    return tiles.map(revealMine);
-  });
-}
-
-export function revealTile(game, tile) {
-  const updated = !game.getIn(['tiles', tile]) ?
-          game : game.setIn(['tiles', tile, 'isRevealed'], true);
-  return isMine(updated, tile) ?
-    revealMines(updated.set('isDead', true)) :
-    attemptWinning(revealAdjacentSafeTiles(updated, tile));
-}
-
-export function createGame(options) {
+export function createGame(options: any) {
   return fromJS({
     cols: options.cols,
     rows: options.rows,
     playingTime: 0,
-    tiles: initTiles(options.rows, options.cols, options.mines)
+    tiles: initTiles(options.rows, options.cols)
   });
+
 }

@@ -1,7 +1,9 @@
 import {Component, enableProdMode} from 'angular2/core';
 import {NgClass} from 'angular2/common';
 import {SingleTile} from './single.tile.component';
+import {ImmutableSingleTile} from './immutableSingleTile';
 import uuid from 'node-uuid';
+import {createGame} from './game';
 
 interface ITile {
   id?: number;
@@ -17,21 +19,30 @@ enableProdMode();
   selector: 'app',
   template: `
   <div class='tileBoard'>
-    <single-tile *ngFor='#tile of getTiles()' [tile]='tile' (tile-click)='handleTileClick($event)'></single-tile>
+    <single-tile *ngFor='#tile of getTiles()' [tile]='tile' ></single-tile>
+  </div>
+
+  <div class='tileBoard'>
+    <immutable-single-tile *ngFor='#tile of getImmutableTiles()'
+    [tile]='tile' ></immutable-single-tile>
   </div>
   `,
-  directives: [NgClass, SingleTile]
+  directives: [NgClass, SingleTile, ImmutableSingleTile]
 })
 
 export class AppComponent {
-    tileObject: ITile;
+    tileObject: any;
     tileX: any;
-    tile: ITile;
+    tile: any;
     _tiles: Array<any> = [];
-    public game: any;
+    game: any;
 
     getTiles() {
       return this._tiles;
+    }
+
+    getImmutableTiles() {
+      return this.game ? this.game.get('tiles') : [];
     }
 
     createGameTiles(numberOfUniqueTiles: number) {
@@ -51,18 +62,15 @@ export class AppComponent {
 
     constructor() {
         if (this.createTiles()) {
-            this.tile = this.createTiles();
-            this._tiles = this.createGameTiles(32);
+          //  this.tile = this.createTiles();
+         this._tiles = this.createGameTiles(32);
+         this.game = createGame({cols: 8, rows: 8 });
+         console.log('constructor', this.game);
         }
+
     }
 
     onInit() {
-        //  this.startNewGame();
-        // this.tileX = createSingleTile();
-        if (this.createTiles()) {
-            this.tile = this.createTiles();
-          //  this._tiles = this.createGameTiles(2);
-        }
 
     }
 
@@ -73,6 +81,26 @@ export class AppComponent {
 
 
     createTile() {
+// 0
+// 24
+// 36
+// 60
+// 66
+// 90
+// 102
+// 126
+// 129
+// 153
+// 165
+// 189
+// 195
+// 219
+// 231
+// 255
+
+
+ // let validNumberPool =   [0, 24, 36, 60, 66, 90, 102, 126, 129, 153, 165, 189, 195, 219, 231, 255];
+
         let baseTile = [
             [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0], [0, 0, 1, 1, 1, 1, 0, 0],
             [0, 1, 0, 0, 0, 0, 1, 0], [0, 1, 0, 1, 1, 0, 1, 0], [0, 1, 1, 0, 0, 1, 1, 0], [0, 1, 1, 1, 1, 1, 1, 0],
@@ -85,7 +113,7 @@ export class AppComponent {
     };
 
     createTileObject() {
-        let _tile: ITile = {
+        let _tile: any = {
           id:  uuid.v4(),
           isRevealed: false,
           isMatched: false,
@@ -94,12 +122,14 @@ export class AppComponent {
         return _tile;
     };
 
+
+
     createTiles() {
         let tiles = this.createTile();
         return tiles;
     };
 
-    // startNewGame() {
-    //     // this.game = createGame({cols: 16, rows: 16, mines: 48});
-    // }
+    startNewGame() {
+      this.game = createGame({cols: 8, rows: 8 });
+    }
 }
